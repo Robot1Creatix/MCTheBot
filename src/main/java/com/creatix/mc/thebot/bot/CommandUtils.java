@@ -10,6 +10,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 import com.creatix.mc.thebot.api.ICommandAction;
 import com.creatix.mc.thebot.bot.objects.Command;
+import com.creatix.mc.thebot.bot.utils.GodModeThread;
+import com.creatix.mc.thebot.mod.ModCore;
 
 public class CommandUtils {
 	
@@ -34,18 +36,45 @@ public class CommandUtils {
 				sender.addChatMessage(new TextComponentTranslation("Subject %s is invalid.", args[0]));
 				return;
 			}
-			String ret = "Monitoring subject [ "+s.player.getDisplayNameString()+" ]\n";
-			ret += "---------------------------------\n";
-			ret += "Alias:      "+s.player.getDisplayNameString()+"\n";
-			ret += "---------------------------------\n";
-			ret += "UserUID:    "+s.uuid+"\n";
-			ret += "UIN:        "+s.getUIN()+"\n";
-			ret += "Projection: "+s.clazz.name+"\n";
-			ret += "Conclusion: "+s.getConclusion()+"\n\n";
-			ret += "AccessLevel:"+s.clazz.accessLevel+"\n";
-			ret += "Relations:  "+s.getRelations()+"\n";
-			ret += "Status:     "+s.getStatus()+"\n";
+			String ret = "";
+			try{
+				ret = "Monitoring subject [ "+s.player.getDisplayNameString()+" ]\n";
+				ret += "---------------------------------\n";
+				ret += "Alias:         "+s.player.getDisplayNameString()+"\n";
+				ret += "---------------------------------\n";
+				ret += "UserUID:       "+s.uuid+"\n";
+				ret += "UIN:           "+s.getUIN()+"\n";
+				ret += "Projection:    "+s.getClassification().name+"\n";
+				ret += "Conclusion:    "+s.getConclusion()+"\n\n";
+				ret += "AccessLevel:   "+s.getClassification().accessLevel+"\n";
+				ret += "Relations:     "+s.getRelations()+"\n";
+				ret += "Status:        "+s.getStatus()+"\n";
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 			sender.addChatMessage(new TextComponentString(ret));
+		});
+		register("godmode", "gm", 1.0F, (sender, args, server) -> {
+			try{
+				EntityPlayer player = (EntityPlayer) sender;
+				if(UserUtils.getUser(player) == null) {
+					sender.addChatMessage(new TextComponentString("User is invalid"));
+					return;
+				}
+				Subject s = UserUtils.getUser(player);	
+				if(s.getClassification() == UserUtils.ADMIN || s.getClassification() == UserUtils.ANALOG_INTERFACE) {
+					if(!s.containsTag("gm")) {
+						s.gmt.start();
+						ModCore.bot.sendMessage("Can You Hear Me?" ,s.player);
+					}else{
+						ModCore.bot.sendMessage("You already in godmode" ,s.player);
+					}
+				}else{
+					s.decreaseRelations(2);
+				}
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
 		});
 	}
 	

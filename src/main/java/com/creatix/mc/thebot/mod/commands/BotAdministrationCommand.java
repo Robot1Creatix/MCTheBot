@@ -60,6 +60,7 @@ public class BotAdministrationCommand extends CommandBase{
 					}
 					ModCore.bot.onStop(sender);
 					ModCore.bot.thread.interrupt();
+					ModCore.isBotActive = false;
 				}else {
 					throw new IllegalStateException("Ваш буллеан сломан. И это не лечится!");
 				} 

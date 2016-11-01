@@ -40,45 +40,43 @@ public class BotInteractionCommand extends CommandBase{
 
 	@Override
 	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-		if(args.length < 1) {
-			sender.addChatMessage(new TextComponentTranslation("Invalid argumants. Use /help !"));
-			return;
-		}
-		if(!ModCore.isBotActive){
-			sender.addChatMessage(new TextComponentTranslation("Bot not working. Use /bot activate"));
-			return;
-		}
-		if(!(sender instanceof EntityPlayer)){
-			sender.addChatMessage(new TextComponentTranslation("You cannot be use commands in command blocks."));
-			return;
-		}
-		Command c = CommandUtils.getCommand(args[0]);
-		if(c == null) {
-			sender.addChatMessage(new TextComponentTranslation("Command %s not found. Use /! help to get all commands", args[0]));
-			return;
-		}
-		EntityPlayer se = (EntityPlayer) sender;
-		Subject s = UserUtils.getUser(se.getUniqueID().toString());
-		if(s == null) {
-			sender.addChatMessage(new TextComponentTranslation("User %s is invalid."));
-			try {
-				UserUtils.reloadUser(UserUtils.initUser(se, server));
-			} catch (JsonIOException | JsonSyntaxException | IOException e) {
-				e.printStackTrace();
+		try{
+			if(args.length < 1) {
+				sender.addChatMessage(new TextComponentTranslation("Invalid argumants. Use /help !"));
 				return;
 			}
-			return;
+			if(!ModCore.isBotActive){
+				sender.addChatMessage(new TextComponentTranslation("Bot not working. Use /bot activate"));
+				return;
+			}
+			if(!(sender instanceof EntityPlayer)){
+				sender.addChatMessage(new TextComponentTranslation("You cannot be use commands in command blocks."));
+				return;
+			}
+			Command c = CommandUtils.getCommand(args[0]);
+			if(c == null) {
+				sender.addChatMessage(new TextComponentTranslation("Command %s not found. Use /! help to get all commands", args[0]));
+				return;
+			}
+			EntityPlayer se = (EntityPlayer) sender;
+			Subject s = UserUtils.getUser(se);
+			if(s == null) {
+				sender.addChatMessage(new TextComponentTranslation("User %s is invalid."));
+				return;
+			}
+			System.out.println(s.getClassification().accessLevel+" "+c.accessLevel);
+			if(s.getClassification().accessLevel < c.accessLevel) {
+				sender.addChatMessage(new TextComponentTranslation("Permition denied"));
+				return;
+			}
+			String[] cArgs = ArrayUtils.removeElement(args, args[0]);
+			System.out.printf("Executing %s... Args {%s}. By %s - %s", c.name, Arrays.toString(cArgs), s.player.getDisplayNameString(), s.getClassification().name);
+			Thread t = new Thread(() -> {
+				c.act.exec(sender, cArgs, server);
+			});
+			t.start();
+		}catch(Exception e ){
+			e.printStackTrace();
 		}
-		System.out.println(s.clazz.accessLevel+" "+c.accessLevel);
-		if(s.clazz.accessLevel < c.accessLevel) {
-			sender.addChatMessage(new TextComponentTranslation("Permition denied"));
-			return;
-		}
-		String[] cArgs = ArrayUtils.removeElement(args, args[0]);
-		System.out.printf("Executing %s... Args {%s}. By %s - %s", c.name, Arrays.toString(cArgs), s.player.getDisplayNameString(), s.clazz.name);
-		Thread t = new Thread(() -> {
-			c.act.exec(sender, cArgs, server);
-		});
-		t.start();
 	}
 }

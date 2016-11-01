@@ -46,7 +46,6 @@ public class TheBot {
 			return false;
 		}
 		thread.start();
-		ModCore.isBotActive = thread.isAlive();
 		return thread.isAlive();
 	}
 	
@@ -64,10 +63,11 @@ public class TheBot {
 				wait(3);
 				sendChatMessage("Admin identified:    %s",new Style().setColor(TextFormatting.YELLOW).setBold(false), admin.getDisplayNameString());
 				wait(2);
-				sendChatMessage("Initializing heuristic  core...", new Style().setColor(TextFormatting.BLUE));
+				sendChatMessage("Initializing heuristic core...", new Style().setColor(TextFormatting.BLUE));
 				wait(5);
 				CommandUtils.init();
 				NeuralSystem.init(this);
+				ModCore.isBotActive = thread.isAlive();
 			}catch(Throwable t) {
 				t.printStackTrace();
 			}

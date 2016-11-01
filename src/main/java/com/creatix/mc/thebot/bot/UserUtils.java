@@ -147,7 +147,7 @@ public class UserUtils {
 		try {
 			JsonObject o = new JsonParser().parse(new InputStreamReader(new FileInputStream(f))).getAsJsonObject();
 			Subject s = new Subject(player, player.getServer(), f);
-			if(!users.contains(s))
+			if(!isRegistered(s))
 				addUser(s);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -186,5 +186,13 @@ public class UserUtils {
 			case "PRTHR": return PRIMARY_THREAT;
 			default: return IRRELEVANT;
 		}
+	}
+	
+	public static boolean isRegistered(Subject s) {
+		for(Subject b : users) {
+			if(b.player.getUniqueID().toString().equals(s.player.getUniqueID().toString()))
+				return true;
+		}
+		return false;
 	}
 }
